@@ -2,10 +2,9 @@ import validator from "validator";
 import SocialNetwork from "../models/SocialNetwork";
 
 interface SocialParams {
-    platform: string;
+    socialBase: string;
     username: string;
     url: string;
-    icon?: string;
     userId?: string;
 }
 
@@ -14,8 +13,8 @@ const SocialNetworkValidator = async(params: SocialParams): Promise<boolean> => 
         throw new Error("Invalid social network data.");
     }
 
-    if (!params.platform || validator.isEmpty(params.platform)) {
-        throw new Error("Platform is required.");
+    if (!params.socialBase || validator.isEmpty(params.socialBase)) {
+        throw new Error("Social Network is required.");
     }
 
     if (!params.username || validator.isEmpty(params.username)) {
@@ -29,11 +28,6 @@ const SocialNetworkValidator = async(params: SocialParams): Promise<boolean> => 
     const existingUrl = await SocialNetwork.findOne({ url: params.url });
     if (existingUrl) {
         throw new Error('Url is already in use by another user');
-    }
-    if (params.icon !== undefined) {
-        if (!validator.isURL(params.icon)) {
-            throw new Error("Icon must be a valid URL.");
-        }
     }
 
     if (params.userId !== undefined) {

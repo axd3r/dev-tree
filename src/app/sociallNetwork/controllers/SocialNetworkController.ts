@@ -94,8 +94,6 @@ export const findByUserId = async (req: Request, res: Response) => {
         const userId = req.params.userId;
         const networkUser = await socialService.findByUserId(userId);
 
-        console.log(networkUser);
-
         return res.status(200).json({
             data: networkUser
         })

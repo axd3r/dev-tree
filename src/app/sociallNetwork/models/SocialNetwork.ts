@@ -1,8 +1,9 @@
 import { model, Schema } from "mongoose";
 
 const socialNetworkSchema = new Schema({
-    platform: {
-        type: String,
+    socialBase: {
+        type: Schema.Types.ObjectId,
+        ref: 'SocialBase',
         required: true,
     },
     username: {
@@ -14,14 +15,10 @@ const socialNetworkSchema = new Schema({
         required: true,
         unique: true,
     },
-    icon: {
-        type: String,
-        required: false,
-    },
     userId: {
         type: Schema.Types.ObjectId,
         ref: "User",
-        required: false
+        required: true
     }
 }, { timestamps: true });
 
