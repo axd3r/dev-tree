@@ -15,10 +15,12 @@ app.use(express.urlencoded({extended: true}));
 const UserRoutes = require("./app/users/routes/UserRoute");
 const SocialNetworkRoute = require("./app/sociallNetwork/routes/SocialNetworkRoute");
 const SocialBaseRoute = require('./app/sociallNetwork/routes/socialBase/SocialBaseRoute');
+const AuthRoute = require('./app/auth/routes/AuthRoute');
 
 app.use("/api/user", UserRoutes);
-app.use('/api/social', SocialNetworkRoute)
+app.use('/api/social', SocialNetworkRoute);
 app.use('/api/social-base', SocialBaseRoute);
+app.use('/api/auth', AuthRoute);
 
 app.get("/", (_req, res) => {
   res.send("¡Hola, TypeScript con Express!");

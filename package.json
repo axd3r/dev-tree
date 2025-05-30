@@ -15,13 +15,16 @@
     "bcrypt": "^5.1.1",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.13.2",
     "mongoose-pagination": "^1.0.0",
     "validator": "^13.15.0"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
+    "@types/dotenv": "^6.1.1",
     "@types/express": "^5.0.1",
+    "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^22.14.1",
     "@types/validator": "^13.15.0",
     "nodemon": "^3.1.9",
