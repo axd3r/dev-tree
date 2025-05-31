@@ -1,5 +1,6 @@
 import jsonwebtoken from 'jsonwebtoken';
 import dotenv from 'dotenv';
+import { Role } from '../types/role';
 
 dotenv.config();
 
@@ -14,12 +15,14 @@ if(!JWT_SECRET) throw new Error('JWT is not defined in the field .env');
 if(!JWT_EXPIRES_IN) throw new Error('JWT_EXPIRES_IN is not defined in the field .env');
 
 export interface Payload {
+    id: string;
     email: string;
-    role: string
+    role: Role;
 }
 
 export const createToken = (user: Payload): string => {
     const payload: Payload = {
+        id: user.id,
         email: user.email,
         role: user.role,
     };

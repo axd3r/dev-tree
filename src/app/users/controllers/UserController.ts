@@ -7,6 +7,7 @@ import { UpdateUserResponse } from "../responses/UpdateUserResponse";
 import UpdateUserValidator from "../validator/updateUser";
 import { DeleteUserResponse } from "../responses/DeleteUserResponse";
 import * as bcrypt from 'bcrypt';
+import { AuthenticatedRequest } from "../../middleware/authMiddleware";
 
 const userService = new UserService();
 
@@ -67,39 +68,49 @@ const findOne = async (req: Request, res: Response) => {
     }
 };
 
-const update = async (req: Request, res: Response) => {
+const update = async (req: AuthenticatedRequest, res: Response) => {
     try {
         const userId = req.params.userId;
-        const userData = req.body
-        
+        const requester = req.user;
+        const userData = req.body;
+
+        if (requester?.id !== userId && requester?.role !== "superadmin") {
+            return res.status(403).json({
+                status: "error",
+                message: "No tienes permiso para actualizar este perfil.",
+            });
+        }
+
         try {
             await UpdateUserValidator(userData, userId);
         } catch (error) {
             const err = error as Error;
-
             return res.status(400).json({
                 status: "error",
-                message: err.message
-            })
+                message: err.message,
+            });
         }
 
-        if (userData.password) userData.password = await bcrypt.hash(userData.password, 10);
+        if (userData.password) {
+            userData.password = await bcrypt.hash(userData.password, 10);
+        }
 
         const user = await userService.update(userId, userData);
-        
+
         if (!user) {
             const response = FindOneUserResponse.notFound();
             return res.status(response.status).json(response);
         }
-        const response = UpdateUserResponse.success(user);
 
+        const response = UpdateUserResponse.success(user);
         return res.status(response.status).json(response);
 
     } catch (error) {
         const response = UpdateUserResponse.serverError(error);
         return res.status(response.status).json(response);
     }
-}
+};
+
 
 const remove = async (req: Request, res: Response) => {
     try {

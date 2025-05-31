@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import { Payload, verifyToken } from "../auth/services/jwt.service";
 
-export interface  AuthenticatedRequest extends Request {
-    user?: Payload
+export interface AuthenticatedRequest extends Request {
+    user?: Payload;
 }
 
 export const authMiddleware = (
@@ -10,20 +10,24 @@ export const authMiddleware = (
     res: Response,
     next: NextFunction
 ): void => {
-    const token = req.headers.authorization?.split(" ")[1];
-    if (!token) {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
         res.status(401).json({
             status: "error",
-            message: "Token de authorizacion no proporcionado"
+            message: "Authorization token missing or invalid format",
         });
         return;
     }
+
+    const token = authHeader.split(" ")[1];
+
     const decoded = verifyToken(token);
 
     if (!decoded) {
         res.status(401).json({
             status: "error",
-            message: "Token inválido o expirado.",
+            message: "Invalid or expired token",
         });
         return;
     }

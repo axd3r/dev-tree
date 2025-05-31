@@ -13,14 +13,6 @@ const UpdateUserValidator = async (params: UpdateUserParams, userId: string): Pr
     if (!params || typeof params !== "object") {
         throw new Error("Invalid user data.");
     }
-
-    if (!userId) {
-        throw new Error("The user ID is required.");
-    }
-
-    if (!validator.isMongoId(userId)) {
-        throw new Error("The user ID must be a valid MongoID.");
-    }
         
     if (params.name !== undefined) {
         if (validator.isEmpty(params.name)) {

@@ -6,15 +6,21 @@ import { CreateSocialNetworkResponse } from "../responses/CreateSocialNetworkRes
 import { FindOneSocialNetworkResponse } from "../responses/FindOneSocialNetworkResponse";
 import { UpdateSocialNetworkResponse } from "../responses/UpdateSoialNetworkResponse";
 import { DeleteSocialNetworkResponse } from "../responses/DeleteSocialNetworkResponse";
+import { AuthenticatedRequest } from "../../middleware/authMiddleware";
 
 const socialService = new SocialNetworkService();
 
-export const save = async (req: Request, res: Response) => {
+export const save = async (req: AuthenticatedRequest, res: Response) => {
     try {
         const params = req.body;
+        const currentUser = req.user!;
+
         await SocialNetworkValidator(params);
 
-        const network = await socialService.save(params);
+        const network = await socialService.save({
+            ...params,
+            userId: currentUser.id
+        });
 
         const response = CreateSocialNetworkResponse.success(network);
         return res.status(response.status).json(response);
@@ -23,6 +29,7 @@ export const save = async (req: Request, res: Response) => {
         return res.status(response.status).json(response);
     }
 };
+
 
 export const getAll = async (_req: Request, res: Response) => {
     try {
@@ -50,20 +57,29 @@ export const findOne = async (req: Request, res: Response) => {
     }
 };
 
-export const update = async (req: Request, res: Response) => {
+export const update = async (req: AuthenticatedRequest, res: Response) => {
     try {
         const socialId = req.params.socialId;
         const data = req.body;
-        await UpdateSocialNetworkValidator(data, socialId);
+        const currentUser = req.user!;
 
-        const network = await socialService.update(socialId, data);
-
+        const network = await socialService.findOne(socialId);
         if (!network) {
             const response = UpdateSocialNetworkResponse.notFound();
             return res.status(response.status).json(response);
         }
 
-        const response = UpdateSocialNetworkResponse.success(network);
+        if (network.userId.toString() !== currentUser.id && currentUser.role !== "superadmin") {
+            return res.status(403).json({
+                status: "error",
+                message: "No tienes permisos para actualizar esta red social."
+            });
+        }
+
+        await UpdateSocialNetworkValidator(data, socialId);
+        const updatedNetwork = await socialService.update(socialId, data);
+
+        const response = UpdateSocialNetworkResponse.success(updatedNetwork);
         return res.status(response.status).json(response);
     } catch (error) {
         const response = UpdateSocialNetworkResponse.serverError(error);
@@ -71,15 +87,26 @@ export const update = async (req: Request, res: Response) => {
     }
 };
 
-export const remove = async (req: Request, res: Response) => {
+
+export const remove = async (req: AuthenticatedRequest, res: Response) => {
     try {
         const socialId = req.params.socialId;
-        const networkDelete = await socialService.remove(socialId);
+        const currentUser = req.user!;
 
-        if (!networkDelete) {
+        const network = await socialService.findOne(socialId);
+        if (!network) {
             const response = DeleteSocialNetworkResponse.notFound();
             return res.status(response.status).json(response);
         }
+
+        if (network.userId.toString() !== currentUser.id && currentUser.role !== "superadmin") {
+            return res.status(403).json({
+                status: "error",
+                message: "No tienes permisos para eliminar esta red social."
+            });
+        }
+
+        await socialService.remove(socialId);
 
         const response = DeleteSocialNetworkResponse.success();
         return res.status(response.status).json(response);

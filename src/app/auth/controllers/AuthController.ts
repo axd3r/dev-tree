@@ -33,6 +33,7 @@ const AuthController = {
             }
 
             const token = createToken({
+                id: userExisting._id.toString(),
                 email: userExisting.email,
                 role: userExisting.role!
             });
